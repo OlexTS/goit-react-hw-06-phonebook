@@ -1,7 +1,13 @@
 import { Formik, ErrorMessage } from 'formik';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { addContact } from 'redux/contactsSlice';
+import { getContacts } from 'redux/selectors';
+
 import * as Yup from 'yup';
 import 'yup-phone';
-import PropTypes from 'prop-types';
+
 import {
   Input,
   FormCont,
@@ -36,9 +42,16 @@ const initialValues = {
   name: '',
   number: '',
 };
-const ContactForm = ({ onSubmit }) => {
+const ContactForm = () => {
+  const dispatch = useDispatch();
+  const allContacts = useSelector(getContacts);
+
   const handleSubmit = (values, { resetForm }) => {
-    onSubmit(values);
+    if (allContacts.some(item => item.name === values.name)) {
+      toast.error(`${values.name} is already in contacts.`);
+      return;
+    }
+    dispatch(addContact(values));
     resetForm();
   };
 
@@ -63,10 +76,6 @@ const ContactForm = ({ onSubmit }) => {
       </FormCont>
     </Formik>
   );
-};
-
-ContactForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
 };
 
 export default ContactForm;
